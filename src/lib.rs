@@ -33,6 +33,17 @@ where
         .filter_map(|x| x.ok())
         .map(|x| x.parse::<T>().unwrap())
 }
+
+pub fn parse_pair<A,B>(line: &str) -> (A, B)
+where A: FromStr,
+      B: FromStr,
+      <A as FromStr>::Err: Debug,
+      <B as FromStr>::Err: Debug,
+{
+    let (a, b) = line.split_once(" ").unwrap();
+    (a.parse().unwrap(), b.parse().unwrap())
+}
+
 pub struct OwnedChars {
     s: String,
     i: usize,
