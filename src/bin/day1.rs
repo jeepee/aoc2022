@@ -1,9 +1,13 @@
-use aoc2022::read_lines;
+use aoc2022::{Input, run_and_print};
 
 fn main() {
+    run_and_print(run);
+}
+
+fn run(input: Input) -> (i32, i32) {
     let mut sums = vec![];
     let mut running = 0;
-    for line in read_lines() {
+    for line in input {
         if line.len() == 0 {
             sums.push(running);
             running = 0;
@@ -15,10 +19,24 @@ fn main() {
         sums.push(running);
     }
 
-    let part1 = sums.iter().max().unwrap();
-    println!("part1: {}", part1);
-
+    let part1 = *sums.iter().max().unwrap();
     sums.sort();
     let part2: i32 = sums.iter().rev().take(3).sum();
-    println!("part2: {}", part2);
+
+    (part1, part2)
+}
+
+#[cfg(test)]
+mod test {
+    use aoc2022::test::{test_example, test_puzzle};
+
+    #[test]
+    fn example() {
+        test_example(crate::run, (24000, 45000));
+    }
+
+    #[test]
+    fn puzzle() {
+        test_puzzle(crate::run, (74711, 209481));
+    }
 }

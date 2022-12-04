@@ -2,7 +2,7 @@ use std::{str::FromStr, cmp::Ordering, fmt::Debug};
 use num_derive::FromPrimitive;    
 use num_traits::FromPrimitive;
 
-use aoc2022::{read_lines, parse_pair};
+use aoc2022::{parse_pair, run_and_print, Input};
 
 #[derive(Copy,Clone,Debug,PartialEq,FromPrimitive)]
 enum Item {
@@ -68,16 +68,38 @@ fn action_to_item(a: Item, action: Action) -> Item {
 }
 
 fn main() {
-    let score1: usize = read_lines()
-        .map(|line| parse_pair::<Item,Item>(&line))
+    run_and_print(run);
+}
+
+fn run(input: Input) -> (usize, usize) {
+    let input: Vec<String> = input.collect();
+
+    let score1: usize = input
+        .iter()
+        .map(|line| parse_pair::<Item,Item>(&line, " "))
         .map(|(a,b)| single_score(a, b))
         .sum();
     
-    let score2: usize = read_lines()
-        .map(|line| parse_pair::<Item,Action>(&line))
+    let score2: usize = input
+        .iter()
+        .map(|line| parse_pair::<Item,Action>(&line, " "))
         .map(|(a,b)| single_score(a, action_to_item(a, b)))
         .sum();
 
-    println!("part1: {}", score1);
-    println!("part2: {}", score2);
+    (score1, score2)
+}
+
+#[cfg(test)]
+mod test {
+    use aoc2022::test::{test_example, test_puzzle};
+
+    #[test]
+    fn example() {
+        test_example(crate::run, (15, 12));
+    }
+
+    #[test]
+    fn puzzle() {
+        test_puzzle(crate::run, (15422, 15442));
+    }
 }

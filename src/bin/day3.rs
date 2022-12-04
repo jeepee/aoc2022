@@ -1,6 +1,5 @@
 use std::{collections::HashSet, str::FromStr};
-
-use aoc2022::parse_input;
+use aoc2022::{parse_input, run_and_print, Input};
 
 #[derive(Default)]
 struct Rucksack(HashSet<char>,HashSet<char>);
@@ -48,7 +47,11 @@ fn find_common_item(rucksacks: &mut [Rucksack]) -> char {
 }
 
 fn main() {
-    let mut rucksacks: Vec<Rucksack> = parse_input().collect();
+    run_and_print(run);
+}
+
+fn run(input: Input) -> (u32, u32) {
+    let mut rucksacks: Vec<Rucksack> = parse_input(input).collect();
     let part1: u32 = rucksacks
         .iter()
         .map(Rucksack::double_item)
@@ -61,6 +64,20 @@ fn main() {
         .map(priority)
         .sum();
     
-    println!("part1: {}", part1);
-    println!("part2: {}", part2);
+    (part1, part2)
+}
+
+#[cfg(test)]
+mod test {
+    use aoc2022::test::{test_example, test_puzzle};
+
+    #[test]
+    fn example() {
+        test_example(crate::run, (157, 70));
+    }
+
+    #[test]
+    fn puzzle() {
+        test_puzzle(crate::run, (7597, 2607));
+    }
 }

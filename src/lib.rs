@@ -1,46 +1,65 @@
 use std::env;
 use std::fmt::Debug;
 use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Lines};
 use std::path::PathBuf;
 use std::str::FromStr;
 
-fn get_input_file() -> PathBuf {
-    let exe = env::current_exe().unwrap();
-    let mut path = PathBuf::from("inputs");
-    path.push(exe.file_name().unwrap());
+pub struct Input(Lines<BufReader<File>>);
 
-    if let Some(ext) = env::args().find(|x| x.starts_with("test")) {
+impl Iterator for Input {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.0.next() {
+                None => return None,
+                Some(Ok(x)) => return Some(x),
+                Some(Err(_)) => {},
+            }
+        }
+    }
+}
+
+fn get_input_file(ext: Option<&str>) -> PathBuf {
+    let exe = env::current_exe().unwrap();
+
+    // optionally strip the dynamic part of the executable that is added by the test-framework
+    let filename = exe.file_name().unwrap().to_string_lossy();
+    let filename = match filename.split_once("-") {
+        Some((x, _)) => x,
+        None => &filename,
+    };
+
+    let mut path = PathBuf::from("inputs");
+    path.push(filename);
+
+    if let Some(ext) = ext {
         path.set_extension(ext);
     }
 
     path
 }
 
-pub fn read_lines() -> impl Iterator<Item = String> {
-    BufReader::new(File::open(get_input_file()).unwrap())
-        .lines()
-        .filter_map(|x| x.ok())
+fn read_lines(file: PathBuf) -> Input {
+    Input(BufReader::new(File::open(file).unwrap()).lines())
 }
 
-pub fn parse_input<T>() -> impl Iterator<Item = T>
+pub fn parse_input<T>(input: Input) -> impl Iterator<Item = T>
 where
     T: FromStr,
     <T as FromStr>::Err: Debug,
 {
-    BufReader::new(File::open(get_input_file()).unwrap())
-        .lines()
-        .filter_map(|x| x.ok())
-        .map(|x| x.parse::<T>().unwrap())
+    input.map(|x| x.parse::<T>().unwrap())
 }
 
-pub fn parse_pair<A,B>(line: &str) -> (A, B)
+pub fn parse_pair<A,B>(line: &str, sep: &str) -> (A, B)
 where A: FromStr,
       B: FromStr,
       <A as FromStr>::Err: Debug,
       <B as FromStr>::Err: Debug,
 {
-    let (a, b) = line.split_once(" ").unwrap();
+    let (a, b) = line.split_once(sep).unwrap();
     (a.parse().unwrap(), b.parse().unwrap())
 }
 
@@ -67,5 +86,45 @@ impl OwnedChars {
             s: string,
             i: 0,
         }
+    }
+}
+
+pub fn run_and_print<F,R>(f: F)
+where
+    F: FnOnce(Input) -> R,
+    R: Debug
+{
+    println!("{:?}", f(read_lines(get_input_file(None))));
+}
+
+pub mod test {
+    use crate::{get_input_file,read_lines,Input};
+
+    pub fn test_file<F,R>(ext: Option<&str>, f: F, expected: R) 
+    where
+        F: FnOnce(Input) -> R,
+        R: PartialEq,
+        R: std::fmt::Debug
+    {
+        let result = f(read_lines(get_input_file(ext)));
+        assert_eq!(result, expected);
+    }
+
+    pub fn test_example<F,R>(f: F, expected: R) 
+    where
+        F: FnOnce(Input) -> R,
+        R: PartialEq,
+        R: std::fmt::Debug
+    {
+        test_file(Some("test"), f, expected)
+    }
+
+    pub fn test_puzzle<F,R>(f: F, expected: R) 
+    where
+        F: FnOnce(Input) -> R,
+        R: PartialEq,
+        R: std::fmt::Debug
+    {
+        test_file(None, f, expected)
     }
 }
