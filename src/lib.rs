@@ -89,6 +89,15 @@ impl OwnedChars {
     }
 }
 
+pub fn slice_mut_twice<T>(arr: &mut [T], a: usize, b: usize) -> (&mut T, &mut T) {
+    // could be written using split_at_mut, but would be more complicated in favor of not using unsafe directly
+    assert!(a != b);
+    unsafe {(
+        &mut *(&mut arr[a] as *mut _),
+        &mut *(&mut arr[b] as *mut _)
+    )}
+}
+
 pub fn run_and_print<F,R>(f: F)
 where
     F: FnOnce(Input) -> R,
