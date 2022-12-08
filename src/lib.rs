@@ -21,7 +21,7 @@ impl Iterator for Input {
     }
 }
 
-fn get_input_file(ext: Option<&str>) -> PathBuf {
+pub fn get_input_file(ext: Option<&str>) -> PathBuf {
     let exe = env::current_exe().unwrap();
 
     // optionally strip the dynamic part of the executable that is added by the test-framework
@@ -41,7 +41,7 @@ fn get_input_file(ext: Option<&str>) -> PathBuf {
     path
 }
 
-fn read_lines(file: PathBuf) -> Input {
+pub fn read_lines(file: PathBuf) -> Input {
     Input(BufReader::new(File::open(file).unwrap()).lines())
 }
 
