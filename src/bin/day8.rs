@@ -1,99 +1,43 @@
-use std::{cmp::max, fmt::Display};
+use std::cmp::max;
 
-use aoc2022::{run_and_print, Input};
+use aoc2022::{run_and_print, Input, grid::Grid};
 
 #[derive(Clone)]
-struct Forest {
-    trees: Vec<u32>,
-    rows: usize,
-    cols: usize,
-}
+struct Forest(Grid<u32>);
 
 impl Forest {
     fn parse(input: Input) -> Self {
-        let mut trees = Vec::new();
+        let mut data = Vec::new();
         let mut rows = 0;
         let mut cols = 0;
 
         for line in input {
             cols += 1;
             rows = line.len();
-            trees.extend(line.chars().map(|c| c.to_digit(10).unwrap() + 1))
+            data.extend(line.chars().map(|c| c.to_digit(10).unwrap() + 1))
         }
 
-        Forest { trees, rows, cols }
+        Forest(Grid::from_data(rows, cols, data))
     }
 
-    fn iter_locations(&self) -> impl Iterator<Item=(usize,usize)> + '_ {
-        (0..self.rows).flat_map(|row| (0..self.cols).map(move |col| (row, col)))
-    }
-
-    fn tree(&self, row: usize, col: usize) -> u32 {
-        self.trees[row * self.cols + col]
-    }
-    
-    fn trees(&self) -> impl Iterator<Item=&u32> {
-        self.trees.iter()
-    }
-
-    fn row(&self, row: usize) -> impl DoubleEndedIterator<Item=&u32> {
-        self.trees.iter().skip(row * self.cols).take(self.cols)
-    }
-
-    fn row_mut(&mut self, row: usize) -> impl DoubleEndedIterator<Item=&mut u32> {
-        self.trees.iter_mut().skip(row * self.cols).take(self.cols)
-    }
-    
-    fn col(&self, col: usize) -> impl DoubleEndedIterator<Item=&u32> {
-        self.trees.iter().skip(col).step_by(self.cols)
-    }
-    
-    fn col_mut(&mut self, col: usize) -> impl DoubleEndedIterator<Item=&mut u32> {
-        self.trees.iter_mut().skip(col).step_by(self.cols)
-    }
-
-    fn trees_up(&self, row: usize, col: usize) -> impl Iterator<Item = &u32> {
-        self.col(col).rev().skip(self.rows - row)
-    }
-
-    fn trees_down(&self, row: usize, col: usize) -> impl Iterator<Item = &u32> {
-        self.col(col).skip(row + 1)
-    }
-
-    fn trees_left(&self, row: usize, col: usize) -> impl Iterator<Item = &u32> {
-        self.row(row).rev().skip(self.cols - col)
-    }
-
-    fn trees_right(&self, row: usize, col: usize) -> impl Iterator<Item = &u32> {
-        self.row(row).skip(col + 1)
-    }
-    
     fn scenic_score(&self, row: usize, col: usize) -> usize {
-        let tree = self.tree(row, col);
-        count_visible(tree, self.trees_up(row, col))
-        * count_visible(tree, self.trees_down(row, col))
-        * count_visible(tree, self.trees_left(row, col))
-        * count_visible(tree, self.trees_right(row, col))
+        let tree = *self.0.get(row, col);
+        count_visible(tree, self.0.iter_up(row, col))
+        * count_visible(tree, self.0.iter_down(row, col))
+        * count_visible(tree, self.0.iter_left(row, col))
+        * count_visible(tree, self.0.iter_right(row, col))
     }
 
     fn is_visible(&self, row: usize, col: usize) -> bool {
-        let tree = self.tree(row, col);
-        self.trees_up(row, col).all(|other| tree > *other)
-        || self.trees_down(row, col).all(|other| tree > *other)
-        || self.trees_left(row, col).all(|other| tree > *other)
-        || self.trees_right(row, col).all(|other| tree > *other)
+        let tree = *self.0.get(row, col);
+        self.0.iter_up(row, col).all(|other| tree > *other)
+        || self.0.iter_down(row, col).all(|other| tree > *other)
+        || self.0.iter_left(row, col).all(|other| tree > *other)
+        || self.0.iter_right(row, col).all(|other| tree > *other)
     }
-}
 
-impl Display for Forest {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for row in 0..self.rows {
-            for tree in self.row(row) {
-                write!(f, "{:x}", tree)?;
-            }
-            writeln!(f, "")?;
-        }
-        Ok(())
+    fn trees(&self) -> impl Iterator<Item=&u32> {
+        self.0.data.iter()
     }
 }
 
@@ -118,14 +62,14 @@ fn num_visible_performant(forest: &Forest) -> usize {
     let mut left_right = forest.clone();
     let mut right_left = forest.clone();
 
-    for row in 0..forest.rows {
-        propagate_max(left_right.row_mut(row));
-        propagate_max(right_left.row_mut(row).rev());
+    for row in 0..forest.0.rows {
+        propagate_max(left_right.0.row_mut(row));
+        propagate_max(right_left.0.row_mut(row).rev());
     }
 
-    for col in 0..forest.cols {
-        propagate_max(top_down.col_mut(col));
-        propagate_max(bottom_up.col_mut(col).rev());
+    for col in 0..forest.0.cols {
+        propagate_max(top_down.0.col_mut(col));
+        propagate_max(bottom_up.0.col_mut(col).rev());
     }
 
     forest
@@ -137,14 +81,14 @@ fn num_visible_performant(forest: &Forest) -> usize {
         .filter(|((((t, a), b), c), d)| t > a || t > b || t > c || t > d)
         .count()
 }
-
+    
 fn run(input: Input) -> (usize, usize) {
     let forest = Forest::parse(input);
  
     let _ = num_visible_performant(&forest);
 
-    let num_visible = forest.iter_locations().filter(|(row, col)| forest.is_visible(*row, *col)).count();
-    let max_scenic_score = forest.iter_locations().map(|(row, col)| forest.scenic_score(row, col)).max().unwrap();
+    let num_visible = forest.0.iter_cells().filter(|cell| forest.is_visible(cell.row, cell.col)).count();
+    let max_scenic_score = forest.0.iter_cells().map(|cell| forest.scenic_score(cell.row, cell.col)).max().unwrap();
 
     (num_visible, max_scenic_score)
 }

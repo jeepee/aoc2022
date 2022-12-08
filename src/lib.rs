@@ -5,6 +5,9 @@ use std::io::{BufRead, BufReader, Lines};
 use std::path::PathBuf;
 use std::str::FromStr;
 
+pub mod grid;
+
+
 pub struct Input(Lines<BufReader<File>>);
 
 impl Iterator for Input {
