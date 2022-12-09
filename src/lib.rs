@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 pub mod grid;
+pub mod point;
 
 
 pub struct Input(Lines<BufReader<File>>);
