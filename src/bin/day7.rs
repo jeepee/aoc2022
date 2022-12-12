@@ -23,6 +23,7 @@ enum Cmd {
 }
 
 impl Cmd {
+    #[allow(clippy::manual_map)]
     fn parse(s: String) -> Option<Self> {
         if let Some(s) = s.strip_prefix("$ ") {
             if s == "cd .." {

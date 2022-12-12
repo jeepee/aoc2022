@@ -8,7 +8,7 @@ fn run(input: Input) -> (i32, i32) {
     let mut sums = vec![];
     let mut running = 0;
     for line in input {
-        if line.len() == 0 {
+        if line.is_empty() {
             sums.push(running);
             running = 0;
         } else {

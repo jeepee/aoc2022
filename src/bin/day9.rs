@@ -58,13 +58,13 @@ impl Rope {
                 let c = self.knots
                     .iter()
                     .position(|knot| *knot == p)
-                    .map(|n| if n == 0 { "H".into() } else if n == self.knots.len() - 1 { "H".into() } else { n.to_string() })
+                    .map(|n| if n == 0 { "H".into() } else if n == self.knots.len() - 1 { "T".into() } else { n.to_string() })
                     .unwrap_or_else(|| if p == Point([0,0]) { "s".into() } else { ".".into() });
                 print!("{}", c);
             }
-            println!("");
+            println!();
         }
-        println!("");
+        println!();
     }
 }
 
@@ -92,7 +92,7 @@ fn display_visited(visited: &HashSet<Point<2>>) {
             let c = if visited.contains(&Point([x, y])) { '#' } else { '.' };
             print!("{}", c);
         }
-        println!("");
+        println!();
     }
 }
 

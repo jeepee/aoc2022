@@ -26,7 +26,7 @@ impl Map {
         self.grid
             .neighbors(row, col, false)
             .filter(|neighbor| *self.grid.get(neighbor.row, neighbor.col) as usize >= min)
-            .map(|n| (n.clone(), 1))
+            .map(|n| (n, 1))
             .collect()
     }
 

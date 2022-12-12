@@ -1,22 +1,18 @@
-use std::{collections::HashSet, str::FromStr};
-use aoc2022::{parse_input, run_and_print, Input};
+use std::collections::HashSet;
+use aoc2022::{run_and_print, Input};
 
 #[derive(Default)]
 struct Rucksack(HashSet<char>,HashSet<char>);
 
-impl FromStr for Rucksack {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
+impl Rucksack {
+    fn parse(s: String) -> Self {
         let l = s.len() / 2;
-        Ok(Rucksack(
+        Rucksack(
             s[..l].chars().into_iter().collect(),
             s[l..].chars().into_iter().collect()
-        ))
+        )
     }
-}
 
-impl Rucksack {
     fn double_item(&self) -> char {
         *self.0.intersection(&self.1).next().unwrap()
     }
@@ -37,9 +33,9 @@ fn priority(item: char) -> u32 {
 
 fn find_common_item(rucksacks: &mut [Rucksack]) -> char {
     *rucksacks
-        .into_iter()
+        .iter_mut()
         .map(Rucksack::take_combined_compartments)
-        .reduce(|acc,item| acc.intersection(&item).map(|x|*x).collect())
+        .reduce(|acc,item| acc.intersection(&item).copied().collect())
         .unwrap()
         .iter()
         .next()
@@ -51,7 +47,7 @@ fn main() {
 }
 
 fn run(input: Input) -> (u32, u32) {
-    let mut rucksacks: Vec<Rucksack> = parse_input(input).collect();
+    let mut rucksacks: Vec<Rucksack> = input.map(Rucksack::parse).collect();
     let part1: u32 = rucksacks
         .iter()
         .map(Rucksack::double_item)

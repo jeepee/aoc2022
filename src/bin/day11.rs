@@ -41,9 +41,9 @@ impl Inspection {
             '*' => item * self.number.unwrap_or(item),
             _   => panic!("invalid oper '{}'", self.oper),
         };
-        level = level / factor;
+        level /= factor;
         if let Some(lcm) = lcm {
-            level = level % lcm;
+            level %= lcm;
         }
         let divisible = level % self.divisor == 0;
         (level, if divisible { self.on_true } else { self.on_false })
@@ -97,7 +97,7 @@ fn run(input: Input) -> (usize,usize) {
     let lcm = monkeys
         .iter()
         .map(|monkey| monkey.inspection.divisor)
-        .fold(1, |acc,div| num::integer::lcm(acc, div));
+        .fold(1, num::integer::lcm);
 
     let part1 = calc_monkey_business(&mut monkeys.clone(), 20, 3, None);
     let part2 = calc_monkey_business(&mut monkeys, 10000, 1, Some(lcm));

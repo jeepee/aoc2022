@@ -12,7 +12,7 @@ impl Op {
     fn parse(s: String) -> Self {
         if &s == "noop" {
             Op::Noop
-        } else if let Some(num) = s.strip_prefix("addx ").map(|s| s.parse::<isize>().ok()).flatten() {
+        } else if let Some(num) = s.strip_prefix("addx ").and_then(|s| s.parse::<isize>().ok()) {
             Op::Addx(num)
         } else { 
             panic!("invalid op: {}", s)
@@ -27,13 +27,13 @@ impl Op {
     }
 }
 
-struct CPU {
+struct Cpu {
     x: isize,
     ops: VecDeque<Op>,
     cycles: usize,
 }
 
-impl CPU {
+impl Cpu {
     fn new<T: Iterator<Item=Op>>(ops: T) -> Self {
         let ops = ops.collect();
         Self { x: 1, ops, cycles: 0 }
@@ -55,13 +55,13 @@ impl CPU {
     }
 }
 
-struct CRT {
+struct Crt {
     pixels: [char;40*6],
 }
 
-impl CRT {
+impl Crt {
     fn new() -> Self {
-        CRT { pixels: [' ';40*6] }
+        Crt { pixels: [' ';40*6] }
     }
 
     fn tick(&mut self, cycle: usize, x: isize) {
@@ -78,7 +78,7 @@ impl CRT {
     }
 }
 
-fn tick_system_return_system_strength(cycle: usize, cpu: &mut CPU, crt: &mut CRT) -> isize {
+fn tick_system_return_system_strength(cycle: usize, cpu: &mut Cpu, crt: &mut Crt) -> isize {
     let x = cpu.x;
     crt.tick(cycle, x);
     cpu.tick();
@@ -87,8 +87,8 @@ fn tick_system_return_system_strength(cycle: usize, cpu: &mut CPU, crt: &mut CRT
 }
 
 fn run(input: Input) -> isize {
-    let mut cpu = CPU::new(input.map(Op::parse));
-    let mut crt = CRT::new();
+    let mut cpu = Cpu::new(input.map(Op::parse));
+    let mut crt = Crt::new();
 
     // Knowing the size of the screen, emit a cycle for each pixel,
     // ticking the whole system and collecing the signal-strenght values for

@@ -30,7 +30,7 @@ pub fn get_input_file(ext: Option<&str>) -> PathBuf {
 
     // optionally strip the dynamic part of the executable that is added by the test-framework
     let filename = exe.file_name().unwrap().to_string_lossy();
-    let filename = match filename.split_once("-") {
+    let filename = match filename.split_once('-') {
         Some((x, _)) => x,
         None => &filename,
     };
@@ -47,14 +47,6 @@ pub fn get_input_file(ext: Option<&str>) -> PathBuf {
 
 pub fn read_lines(file: PathBuf) -> Input {
     Input(BufReader::new(File::open(file).unwrap()).lines())
-}
-
-pub fn parse_input<T>(input: Input) -> impl Iterator<Item = T>
-where
-    T: FromStr,
-    <T as FromStr>::Err: Debug,
-{
-    input.map(|x| x.parse::<T>().unwrap())
 }
 
 pub fn parse_pair<A,B>(line: &str, sep: &str) -> (A, B)

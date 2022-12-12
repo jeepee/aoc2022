@@ -76,13 +76,13 @@ fn run(input: Input) -> (usize, usize) {
 
     let score1: usize = input
         .iter()
-        .map(|line| parse_pair::<Item,Item>(&line, " "))
+        .map(|line| parse_pair::<Item,Item>(line, " "))
         .map(|(a,b)| single_score(a, b))
         .sum();
     
     let score2: usize = input
         .iter()
-        .map(|line| parse_pair::<Item,Action>(&line, " "))
+        .map(|line| parse_pair::<Item,Action>(line, " "))
         .map(|(a,b)| single_score(a, action_to_item(a, b)))
         .sum();
 

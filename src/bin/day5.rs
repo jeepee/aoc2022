@@ -62,7 +62,7 @@ impl Move {
 fn run(mut input: Input) -> (String, String) {
     // Take input-iterator by_ref() in order not to consume it by take_while().
     // The input-iterator will remain valid and contain the remaining lines.
-    let mut stacks = Stacks::parse(input.by_ref().take_while(|x| x.len() > 0));
+    let mut stacks = Stacks::parse(input.by_ref().take_while(|x| !x.is_empty()));
     let moves = input.map(Move::parse).collect::<Vec<_>>();
 
     let part1 = {

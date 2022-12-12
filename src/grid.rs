@@ -37,11 +37,11 @@ impl<T> Grid<T> {
     }
 
     pub fn row(&self, row: usize) -> impl DoubleEndedIterator<Item=&T> {
-        self.data.iter().skip(row * self.cols).take(self.cols)
+        self.data[row * self.cols..(row+1)*self.cols].iter()
     }
 
     pub fn row_mut(&mut self, row: usize) -> impl DoubleEndedIterator<Item=&mut T> {
-        self.data.iter_mut().skip(row * self.cols).take(self.cols)
+        self.data[row * self.cols..(row+1)*self.cols].iter_mut()
     }
     
     pub fn col(&self, col: usize) -> impl DoubleEndedIterator<Item=&T> {
@@ -62,9 +62,9 @@ impl<T> Grid<T> {
         };
 
         NeighborIter(coords
-            .iter()
+            .into_iter()
             .filter(|(row, col)| *row >= 0 && *row < rows && *col >= 0 && *col < cols)
-            .map(|(row,col)| Cell{row: *row as usize, col: *col as usize})
+            .map(|(row,col)| Cell{row: row as usize, col: col as usize})
             .collect()
         )
     }

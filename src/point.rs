@@ -12,31 +12,13 @@ pub struct Offset<const N: usize>(pub [isize;N]);
 
 impl<const N: usize> Point<N> {
     pub fn new(coords: &[isize]) -> Self {
-        if coords.len() != N {
-            panic!("invalid number of coordinates ({} instead of {})", coords.len(), N);
-        }
-
-        let mut point = Point([0;N]);
-        for i in 0..N {
-            point.0[i] = coords[i]
-        }
-        
-        point
+        Self(coords.try_into().unwrap())
     }
 }
 
 impl<const N: usize> Offset<N> {
     pub fn new(coords: &[isize]) -> Self {
-        if coords.len() != N {
-            panic!("invalid number of coordinates ({} instead of {})", coords.len(), N);
-        }
-
-        let mut offset = Offset([0;N]);
-        for i in 0..N {
-            offset.0[i] = coords[i]
-        }
-        
-        offset
+        Self(coords.try_into().unwrap())
     }
 }
 
@@ -100,11 +82,11 @@ fn display_array<T>(items: &[T], f: &mut std::fmt::Formatter<'_>) -> Result<(), 
 where T: Display
 {
     write!(f, "(")?;
-    for i in 0..items.len() {
+    for (i, item) in items.iter().enumerate() {
         if i != 0 {
             write!(f, ",")?;
         }
-        write!(f, "{}", items[i])?;
+        write!(f, "{}", item)?;
     }
     write!(f, ")")
 }
