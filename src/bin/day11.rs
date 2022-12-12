@@ -21,10 +21,10 @@ impl Monkey {
     fn parse(lines: &[String]) -> Monkey {
         let items    = lines[1][18..].split(", ").map(|n| n.parse().unwrap()).collect();
         let oper     = lines[2].chars().nth(23).unwrap();
-        let number   = lines[2][25..].parse::<usize>().ok();
-        let divisor  = lines[3][21..].parse::<usize>().unwrap();
-        let on_true  = lines[4][29..].parse::<usize>().unwrap();
-        let on_false = lines[5][30..].parse::<usize>().unwrap();
+        let number   = lines[2][25..].parse().ok();
+        let divisor  = lines[3][21..].parse().unwrap();
+        let on_true  = lines[4][29..].parse().unwrap();
+        let on_false = lines[5][30..].parse().unwrap();
         
         Monkey { items, inspection: Inspection { oper, number, divisor, on_true, on_false }}
     }

@@ -9,9 +9,9 @@ pub struct Grid<T> {
     pub data: Vec<T>,
 }
 
-impl<T: Default> Grid<T> {
-    pub fn new(rows: usize, cols: usize) -> Self {
-        Grid { rows, cols, data: Vec::new() }
+impl<T: Clone> Grid<T> {
+    pub fn new(rows: usize, cols: usize, elem: T) -> Self {
+        Grid { rows, cols, data: vec![elem; rows * cols]}
     }
 }
 
@@ -64,7 +64,7 @@ impl<T> Grid<T> {
         NeighborIter(coords
             .iter()
             .filter(|(row, col)| *row >= 0 && *row < rows && *col >= 0 && *col < cols)
-            .map(|(row,col)| (*row as usize, *col as usize))
+            .map(|(row,col)| Cell{row: *row as usize, col: *col as usize})
             .collect()
         )
     }
@@ -86,16 +86,26 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T> Grid<T> where T: PartialEq {
+    pub fn find(&self, item: &T) -> Option<Cell> {
+        self.data
+            .iter()
+            .position(|e| e == item)
+            .map(|idx| Cell { row: idx / self.cols, col: idx % self.cols })
+    }
+}
+
+#[derive(Clone,Copy,Debug,Eq,Hash,PartialEq)]
 pub struct Cell {
     pub row: usize,
     pub col: usize,
 }
 
-pub struct NeighborIter(Vec<(usize,usize)>);
+pub struct NeighborIter(Vec<Cell>);
 
 impl Iterator for NeighborIter {
-    type Item = (usize,usize);
-    fn next(&mut self) -> Option<(usize,usize)> {
+    type Item = Cell;
+    fn next(&mut self) -> Option<Cell> {
         self.0.pop()
     }
 }
@@ -114,12 +124,35 @@ where T: Display
     }
 }
 
-impl Grid<usize> {
-    pub fn from_lines(lines: impl Iterator<Item=String>) -> Grid<usize> {
+impl<T> Grid<T> {
+    pub fn from_lines<F>(lines: impl Iterator<Item=String>, f: F) -> Grid<T>
+    where F: Fn(char) -> T
+    {
         let mut lines = lines.peekable();
         let cols = lines.peek().unwrap().len();
-        let data: Vec<usize> = lines.flat_map(OwnedChars::from_string).map(|c| (c as usize) - ('0' as usize)).collect();
+        let data: Vec<T> = lines.flat_map(OwnedChars::from_string).map(f).collect();
 
         Grid::from_data(data.len() / cols, cols, data)
+    }
+}
+pub enum Dir {
+    Up, Down, Left, Right,
+    UpLeft, UpRight, DownLeft, DownRight,
+}
+
+impl Dir {
+    pub fn between(from: &Cell, to: &Cell) -> Option<Self> {
+        use Dir::*;
+        match (to.row as isize - from.row as isize, to.col as isize - from.col as isize) {
+            (-1, 0) => Some(Up),
+            (-1, 1) => Some(UpRight),
+            ( 0, 1) => Some(Right),
+            ( 1, 1) => Some(DownRight),
+            ( 1, 0) => Some(Down),
+            ( 1,-1) => Some(DownLeft),
+            ( 0,-1) => Some(Left),
+            (-1,-1) => Some(UpLeft),
+            _       => None,
+        }
     }
 }
