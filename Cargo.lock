@@ -10,6 +10,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "pathfinding",
+ "peeking_take_while",
 ]
 
 [[package]]
@@ -153,9 +154,9 @@ dependencies = [
 
 [[package]]
 name = "pathfinding"
-version = "4.0.0"
+version = "4.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09ba65132000a419ec9b12d1850a4f73896afd0e8575d4dae41097e17600048f"
+checksum = "37f405a157545aba27c09641f1b9e87c2fe7e0e7c1281149c0a77deb13f47966"
 dependencies = [
  "fixedbitset",
  "indexmap",
@@ -165,6 +166,12 @@ dependencies = [
  "rustc-hash",
  "thiserror",
 ]
+
+[[package]]
+name = "peeking_take_while"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e9ed2178b0575fff8e1b83b58ba6f75e727aafac2e1b6c795169ad3b17eb518"
 
 [[package]]
 name = "proc-macro2"
