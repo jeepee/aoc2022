@@ -94,12 +94,20 @@ pub fn slice_mut_twice<T>(arr: &mut [T], a: usize, b: usize) -> (&mut T, &mut T)
     )}
 }
 
+/// Runs the provided function on the input from the file derived form the binary-name.
+/// Files are searched in the "inputs" directory and should be of the form "day1" for puzzle input.
+/// 
+/// When the arguments contain an argument that starts with "test", an example input-file will be chosen instead.
+/// 
+/// eg: if "test" is passed as an argument, the file "inputs/day1.test" will be used
+///     if "test2" is passed as an argument, the file "inputs/day1.test2" will be used
 pub fn run_and_print<F,R>(f: F)
 where
     F: FnOnce(Input) -> R,
     R: Debug
 {
-    println!("{:?}", f(read_lines(get_input_file(None))));
+    let ext = env::args().find(|arg| arg.starts_with("test"));
+    println!("{:?}", f(read_lines(get_input_file(ext.as_deref()))));
 }
 
 pub mod test {

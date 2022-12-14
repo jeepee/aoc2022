@@ -1,4 +1,6 @@
-use std::fmt::Display;
+use std::{fmt::Display, cmp::max};
+
+use num::signum;
 
 use crate::OwnedChars;
 
@@ -154,5 +156,40 @@ impl Dir {
             (-1,-1) => Some(UpLeft),
             _       => None,
         }
+    }
+}
+
+pub struct LineIter {
+    next: Cell,
+    step: (isize, isize),
+    count: usize,
+}
+
+impl LineIter {
+    pub fn new(from: Cell, to: Cell) -> Option<Self> {
+        let step = (signum(to.row as isize - from.row as isize), signum(to.col as isize - from.col as isize));
+        let count = max(to.row.abs_diff(from.row), to.col.abs_diff(from.col)) + 1;
+        if step.0 != 0 && step.1 != 0 {
+            return None
+        }
+
+        Some(LineIter { next: from, step, count })
+    }
+}
+
+impl Iterator for LineIter {
+    type Item = Cell;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count == 0 {
+            return None;
+        }
+
+        let next = self.next;
+        self.next.row = (self.next.row as isize + self.step.0) as usize;
+        self.next.col = (self.next.col as isize + self.step.1) as usize;
+        self.count -= 1;
+
+        Some(next)
     }
 }
