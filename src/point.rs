@@ -14,6 +14,14 @@ impl<const N: usize> Point<N> {
     pub fn new(coords: &[isize]) -> Self {
         Self(coords.try_into().unwrap())
     }
+
+    pub fn manhattan_dist(&self, other: &Self) -> usize {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .map(|(a,b)| a.abs_diff(*b))
+            .sum()
+    }
 }
 
 impl<const N: usize> Offset<N> {
@@ -53,6 +61,16 @@ impl<const N: usize> std::ops::Add<Offset<N>> for Point<N> {
     fn add(mut self, other: Offset<N>) -> Point<N> {
         for i in 0..N {
             self.0[i] += other.0[i];
+        }
+        Point(self.0)
+    }
+}
+
+impl<const N: usize> std::ops::Sub<Offset<N>> for Point<N> {
+    type Output = Point<N>;
+    fn sub(mut self, other: Offset<N>) -> Point<N> {
+        for i in 0..N {
+            self.0[i] -= other.0[i];
         }
         Point(self.0)
     }
